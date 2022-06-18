@@ -4,11 +4,11 @@
 
 .main {
   min-height: 100vh;
-  padding: 4rem 0;
+  padding: 2rem 0;
   flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
 }
 
@@ -41,6 +41,7 @@
 
 .title {
   margin: 0;
+
   line-height: 1.15;
   font-size: 4rem;
 }
@@ -51,7 +52,7 @@
 }
 
 .description {
-  margin: 4rem 0;
+  margin: 0 0 1rem;
   line-height: 1.5;
   font-size: 1.5rem;
 }
@@ -113,4 +114,25 @@
     width: 100%;
     flex-direction: column;
   }
+}
+
+.nav ul{
+  display: flex;
+  justify-content: center;
+  list-style-type: none;
+}
+
+
+.nav ul li{
+  margin: 2rem 2rem 0;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.imgWrp{
+  margin: 1.5rem 0;
+}
+
+.imgCore{
+  border-radius: 1rem;
 }
