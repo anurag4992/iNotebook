@@ -22,6 +22,7 @@ router.post("/createUser", [
         let user = await User.findOne({ email: req.body.email });
         if (user) {
             res.status(400).json({ error: "User already exists, jake login kr" });
+            res.redirect("/login");
         }
 
         const salt = await bcrypt.genSalt(10);
@@ -49,7 +50,7 @@ router.post("/createUser", [
 
 router.post("/login", [
     body('email', "Enter a valid email").isEmail(),
-    body('password', "Password cannot be block").exists()
+    body('password', "Password cannot be blank").exists()
 ], async (req, res) => {
     //if error
     const errors = validationResult(req);
