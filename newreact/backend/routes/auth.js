@@ -13,16 +13,17 @@ router.post("/createUser", [
     body('password', "Invalid password(>5 required)").isLength({ min: 5 })
 ], async (req, res) => {
     //if error
+    let success = 0
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
+        return res.status(400).json({success, errors: errors.array() });
     }
     try {
 
         let user = await User.findOne({ email: req.body.email });
         if (user) {
-            res.status(400).json({ error: "User already exists, jake login kr" });
-            res.redirect("/login");
+            success=1
+            res.status(400).json({success, error: "User already exists, jake login kr" });
         }
 
         const salt = await bcrypt.genSalt(10);
@@ -39,8 +40,8 @@ router.post("/createUser", [
             }
         }
         const authToken = jwt.sign(data, JWT_SECRET);
-
-        res.json({ authToken });
+        success = 2
+        res.json({success, authToken });
     } catch (err) {
         console.error(err.message);
         res.status(500).send("Some error ocurred");
@@ -53,6 +54,8 @@ router.post("/login", [
     body('password', "Password cannot be blank").exists()
 ], async (req, res) => {
     //if error
+
+    let success = false;
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
@@ -62,11 +65,12 @@ router.post("/login", [
     try {
         let user = await User.findOne({ email });
         if (!user) {
-            return res.status(400).json({ error: "Please insert correct credentials" });
+            return res.status(400).json({ success, error: "Please insert correct credentials" });
         }
+
         const passwordCompare = await bcrypt.compare(password, user.password);
         if (!passwordCompare) {
-            return res.status(400).json({ error: "Please insert correct credentials" });
+            return res.status(400).json({ success, error: "Please insert correct credentials" });
         }
         const data = {
             user: {
@@ -74,7 +78,8 @@ router.post("/login", [
             }
         }
         const authToken = jwt.sign(data, JWT_SECRET);
-        res.json({ authToken })
+        success = true;
+        res.json({ success, authToken })
 
     } catch (error) {
         console.error(err.message);
@@ -85,7 +90,7 @@ router.post("/login", [
 router.post("/getUser", fetchUser, async (req, res) => {
 
     try {
-        userId = req.user.id;
+        const userId = req.user.id;
         const user = await User.findById(userId).select("-password")
         res.send(user);
     } catch (error) {
@@ -94,5 +99,6 @@ router.post("/getUser", fetchUser, async (req, res) => {
     }
 })
 
-
 module.exports = router;
+
+//"test": "echo \"Error: no test specified\" && exit 1"

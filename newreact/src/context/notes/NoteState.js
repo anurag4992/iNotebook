@@ -1,81 +1,97 @@
-import React, {useState} from "react";
+import React, { useState } from "react";
 import NoteContext from './noteContext'
 
-const NoteState = (props) =>{
+const NoteState = (props) => {
 
-    const noteInitial = [
-        {
-          "_id": "62c4410fd7cbab4cb7b45f59",
-          "user": "62c40faf18c02eb7872a5f95",
-          "title": "My titleNew",
-          "description": "My descriptionNew",
-          "tag": "Youtube",
-          "date": "2022-07-05T13:47:59.343Z",
-          "__v": 0
-        },
-        {
-          "_id": "62c4427b7b29232bde2c41c2",
-          "user": "62c40faf18c02eb7872a5f95",
-          "title": "Not a good note",
-          "description": "But good description",
-          "tag": "Discord",
-          "date": "2022-07-05T13:54:03.086Z",
-          "__v": 0
-        },
-        {
-          "_id": "62c442847b29232bde2c41c4",
-          "user": "62c40faf18c02eb7872a5f95",
-          "title": "Not good notes",
-          "description": "But good description",
-          "tag": "Discord",
-          "date": "2022-07-05T13:54:12.355Z",
-          "__v": 0
-        },
-        {
-          "_id": "62c446bd71df479130f9dcc2",
-          "user": "62c40faf18c02eb7872a5f95",
-          "title": "Not good notes",
-          "description": "But good description",
-          "tag": "Discord",
-          "date": "2022-07-05T14:12:13.189Z",
-          "__v": 0
-        },
-        {
-          "_id": "62c446bd71df479130f9dcc2",
-          "user": "62c40faf18c02eb7872a5f95",
-          "title": "Not good notes",
-          "description": "But good description",
-          "tag": "Discord",
-          "date": "2022-07-05T14:12:13.189Z",
-          "__v": 0
-        },
-        {
-          "_id": "62c446bd71df479130f9dcc2",
-          "user": "62c40faf18c02eb7872a5f95",
-          "title": "Not good notes",
-          "description": "But good description",
-          "tag": "Discord",
-          "date": "2022-07-05T14:12:13.189Z",
-          "__v": 0
-        },
-        {
-          "_id": "62c446bd71df479130f9dcc2",
-          "user": "62c40faf18c02eb7872a5f95",
-          "title": "Not good notes",
-          "description": "But good description",
-          "tag": "Discord",
-          "date": "2022-07-05T14:12:13.189Z",
-          "__v": 0
-        }
-      ]
+  const host = "http://localhost:8000"
 
-      const [notes, setNotes] = useState(noteInitial)
+  const [notes, setNotes] = useState([])
 
-    return (
-        <NoteContext.Provider value={{notes, setNotes}}>
-            {props.children}
-        </NoteContext.Provider>
-    )
+  const getNote = async (token) => {
+  
+    //api call
+    const response = await fetch(`${host}/api/notes/fetchallNotes`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'auth-token': token
+      }
+    });
+    const json = await response.json();
+    //api call ends
+
+    setNotes(json)
+
+  }
+
+  const addNote = async (title, description, tag, token) => {
+  
+    //api call
+   const response = await fetch(`${host}/api/notes/addNote`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'auth-token': token
+      },
+      body: JSON.stringify({title, description, tag}) 
+    });
+    //api call ends
+    const json = await response.json()
+    setNotes(notes.concat(json))
+    
+  }
+
+  const deleteNote = async (id, token) => {
+    
+    //api call
+    const response = await fetch(`${host}/api/notes/deleteNote/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'auth-token': token
+      }
+    });
+    
+    const json = await response.json(); 
+    console.log(json);
+    //api call end
+
+    const newNotes = notes.filter((note) => {return note._id!==id})
+    setNotes(newNotes)
+  }
+
+  const editNote = async (id, title, description, tag, token) => {
+    
+    //api call
+    const response = await fetch(`${host}/api/notes/updateNote/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'auth-token': token
+      },
+      body: JSON.stringify({title, description, tag}) 
+    });
+    const json = await response.json(); 
+    console.log(json);
+    //api call end
+    const newNotes = JSON.parse(JSON.stringify(notes));
+    for (let index = 0; index < newNotes.length; index++) {
+      const element = newNotes[index];
+      if(element._id === id){
+        newNotes[index].title=title;
+        newNotes[index].description=description;
+        newNotes[index].tag=tag;
+        break;
+      }
+    }
+    setNotes(newNotes)
+  }
+
+  return (
+    <NoteContext.Provider value={{ notes, addNote, deleteNote, editNote, getNote }}>
+      {props.children}
+    </NoteContext.Provider>
+  )
 }
 
 export default NoteState
